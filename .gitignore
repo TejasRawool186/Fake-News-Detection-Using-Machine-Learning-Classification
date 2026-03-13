@@ -1,0 +1,11 @@
+.venv/
+.sfdx/
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+.streamlit/
+.DS_Store
+Thumbs.db
+*.pyc
+*.pyo
+*.pyd
