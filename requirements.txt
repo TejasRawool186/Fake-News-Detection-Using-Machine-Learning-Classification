@@ -1,6 +1,9 @@
-streamlit==1.55.0
-joblib==1.5.3
-pandas==2.3.3
-nltk==3.9.2
-scikit-learn==1.8.0
-matplotlib==3.10.8
+streamlit
+joblib
+pandas
+nltk
+scikit-learn
+plotly
+numpy
+newspaper3k
+lxml_html_clean
