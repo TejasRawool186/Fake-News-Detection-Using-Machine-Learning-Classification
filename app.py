@@ -6,18 +6,6 @@ import re
 from newspaper import Article
 
 
-from newspaper import Article
-
-def get_article_text(url):
-    try:
-        article = Article(url)
-        article.download()
-        article.parse()
-        return article.text
-    except:
-        return None
-    
-    
 st.set_page_config(page_title="AI Fake News Detection", layout="wide")
 
 # ================= THEME =================
@@ -101,10 +89,15 @@ st.sidebar.markdown("<div class='side-card nb'>Naive Bayes 93.7%</div>", unsafe_
 st.sidebar.markdown("<div class='side-card svm'>SVM Accuracy 99.5%</div>", unsafe_allow_html=True)
 
 # ================= LOAD MODELS =================
-lr = joblib.load("logistic_regression_model.pkl")
-nb = joblib.load("naive_bayes_model.pkl")
-svm = joblib.load("svm_model.pkl")
-vectorizer = joblib.load("tfidf_vectorizer.pkl")
+@st.cache_resource
+def load_models():
+    lr = joblib.load("logistic_regression_model.pkl")
+    nb = joblib.load("naive_bayes_model.pkl")
+    svm = joblib.load("svm_model.pkl")
+    vectorizer = joblib.load("tfidf_vectorizer.pkl")
+    return lr, nb, svm, vectorizer
+
+lr, nb, svm, vectorizer = load_models()
 
 ## ================= INPUT =================
 
@@ -149,7 +142,7 @@ def get_article_text(url):
         article.download()
         article.parse()
         return article.text
-    except:
+    except Exception:
         return None
 
 # logic
@@ -168,6 +161,10 @@ def source_modifier(source):
 #
 if st.button("🚀 Analyze AI Prediction"):
 
+    if not news or not news.strip():
+        st.warning("⚠️ Please enter a news article or paste a URL to analyze.")
+        st.stop()
+
     url = get_url(news)
 
     if url:
@@ -179,14 +176,12 @@ if st.button("🚀 Analyze AI Prediction"):
             st.error("❌ Unable to extract article text")
             st.stop()
 
-        else :
-             st.success("✅ Article fetched successfully...")
+        else:
+            st.success("✅ Article fetched successfully...")
 
         news_text = extracted
     else:
         news_text = news
-        
-    modifier = source_modifier(source)
 
     vec = vectorizer.transform([news_text])
 
@@ -195,7 +190,7 @@ if st.button("🚀 Analyze AI Prediction"):
 
     try:
         svm_prob = svm.predict_proba(vec)[0]
-    except:
+    except AttributeError:
         score = svm.decision_function(vec)[0]
         prob_real = 1 / (1 + np.exp(-score))
         svm_prob = [1 - prob_real, prob_real]
@@ -210,7 +205,6 @@ if st.button("🚀 Analyze AI Prediction"):
 
     # adjust confidence
     modifier = source_modifier(source)
-
     lr_conf_adj = max(0, min(100, lr_conf + modifier))
     nb_conf_adj = max(0, min(100, nb_conf + modifier))
     svm_conf_adj = max(0, min(100, svm_conf + modifier))
