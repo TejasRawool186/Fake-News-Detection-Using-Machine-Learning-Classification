@@ -3,7 +3,11 @@ import joblib
 import plotly.graph_objects as go
 import numpy as np
 import re
-from newspaper import Article
+try:
+    from newspaper import Article
+    NEWSPAPER_AVAILABLE = True
+except ImportError:
+    NEWSPAPER_AVAILABLE = False
 
 
 st.set_page_config(page_title="AI Fake News Detection", layout="wide")
@@ -168,6 +172,10 @@ if st.button("🚀 Analyze AI Prediction"):
     url = get_url(news)
 
     if url:
+        if not NEWSPAPER_AVAILABLE:
+            st.warning("⚠️ URL extraction is not available in this deployment. Please paste the article text directly.")
+            st.stop()
+
         st.info("🔗 URL detected — extracting article...")
 
         extracted = get_article_text(url)

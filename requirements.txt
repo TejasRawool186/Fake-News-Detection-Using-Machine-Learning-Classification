@@ -5,5 +5,3 @@ nltk
 scikit-learn
 plotly
 numpy
-newspaper3k
-lxml_html_clean
